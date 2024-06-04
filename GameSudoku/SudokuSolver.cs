@@ -353,12 +353,18 @@ namespace SudokuSolver
             puzzle = new int[9, 9];
 
             FillDiagonalBlocks();
+
             SolveSudoku();
 
             solvedPuzzle = new int[9, 9];
             Array.Copy(puzzle, solvedPuzzle, puzzle.Length);
 
             Random rand = new Random();
+            for (int i = 0; i < 5; i++)  
+            {
+                ShuffleMap(rand.Next(5));
+            }
+
             while (cluesToRemove > 0)
             {
                 int row = rand.Next(9);
@@ -402,6 +408,7 @@ namespace SudokuSolver
             }
             DisplayPuzzle();
         }
+
         // Перевірка чи створена сітка може існувати по правилам гри(зберігає поточний стан, розв'язує його)
         public bool IsSolvable()
         {
