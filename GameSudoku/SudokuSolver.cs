@@ -1,4 +1,4 @@
-﻿using GameSudoku;
+using GameSudoku;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +10,19 @@ namespace SudokuSolver
 {
     class SudokuSolverLogic
     {
-        private int[,] puzzle = new int[9, 9];
-        private Button[,] buttons = new Button[9, 9];
-        private Stack<(int, int, int)> steps = new Stack<(int, int, int)>();
-        private List<(int, int)> emptyCells = new List<(int, int)>();
-        private Dictionary<(int, int), List<int>> candidates = new Dictionary<(int, int), List<int>>();
-        private int[,] initialPuzzle = new int[9, 9];
-        private int currentIndex = 0;
+        private int[,] puzzle = new int[9, 9];  // Матриця для збереження судоку
+        private Button[,] buttons = new Button[9, 9];  // Матриця кнопок для відображення судоку
+        private Stack<(int, int, int)> steps = new Stack<(int, int, int)>();  // Стек для збереження кроків
+        private List<(int, int)> emptyCells = new List<(int, int)>();  // Список порожніх комірок
+        private Dictionary<(int, int), List<int>> candidates = new Dictionary<(int, int), List<int>>();  // Словник кандидатів для кожної комірки
+        private int[,] initialPuzzle = new int[9, 9];  // Початкове розміщення судоку
+        private int currentIndex = 0;  // Поточний індекс
         private SudokuInitialize initialize;
-        private int[,] solvedPuzzle;
-        private List<(int, int)> hintCells = new List<(int, int)>();
+        public int[,] solvedPuzzle;
+        private List<(int, int)> hintCells = new List<(int, int)>();  // Список комірок для підказок
 
-        public SudokuSolverLogic( int[,] puzzle, Button[,] buttons, Stack<(int, int, int)> steps, List<(int, int)> emptyCells, Dictionary<(int, int), List<int>> candidates, int[,] initialPuzzle, int currentIndex)
+        // Конструктор класу
+        public SudokuSolverLogic(int[,] puzzle, Button[,] buttons, Stack<(int, int, int)> steps, List<(int, int)> emptyCells, Dictionary<(int, int), List<int>> candidates, int[,] initialPuzzle, int currentIndex)
         {
             this.puzzle = puzzle;
             this.buttons = buttons;
@@ -33,28 +34,30 @@ namespace SudokuSolver
             initialize = new SudokuInitialize();
         }
 
+        // Завантаження початкового стану судоку
         public void LoadPuzzle()
         {
             int[,] initial = new int[9, 9]
             {
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },
             };
 
-            Array.Copy(initial, initialPuzzle, initial.Length);
-            Array.Copy(initial, puzzle, initial.Length);
-            emptyCells.Clear();
-            steps.Clear();
-            candidates.Clear();
-            currentIndex = 0;
+            Array.Copy(initial, initialPuzzle, initial.Length);  // Копіювання початкового стану
+            Array.Copy(initial, puzzle, initial.Length);  // Копіювання у поточний стан
+            emptyCells.Clear();  // Очищення списку порожніх комірок
+            steps.Clear();  // Очищення стеку кроків
+            candidates.Clear();  // Очищення кандидатів
+            currentIndex = 0;  // Скидання поточного індексу
 
+            // Заповнення порожніх комірок та кандидатів
             for (int row = 0; row < 9; row++)
             {
                 for (int col = 0; col < 9; col++)
@@ -66,14 +69,17 @@ namespace SudokuSolver
                     }
                 }
             }
-            DisplayPuzzle();
+            DisplayPuzzle();  // Відображення судоку
         }
+
+        // Обробка натиснення кнопок
         public void ClickButtons(object sender)
         {
             Button pressedButton = sender as Button;
             string buttonText = pressedButton.Text;
             int row = -1, col = -1;
 
+            // Пошук кнопки, яку натиснули
             for (int i = 0; i < 9; i++)
             {
                 for (int j = 0; j < 9; j++)
@@ -89,6 +95,7 @@ namespace SudokuSolver
                     break;
             }
 
+            // Оновлення значення у судоку
             if (row != -1 && col != -1)
             {
                 if (string.IsNullOrEmpty(buttonText))
@@ -102,12 +109,14 @@ namespace SudokuSolver
                         num = 1;
                     puzzle[row, col] = num;
                 }
-                DisplayPuzzle();
+                DisplayPuzzle();  // Відображення оновленого судоку
             }
         }
 
+        // Автоматичне розв'язання судоку
         public void SolveSudokuAutomatically()
         {
+            // Очищення некоректних значень
             for (int row = 0; row < 9; row++)
             {
                 for (int col = 0; col < 9; col++)
@@ -120,25 +129,17 @@ namespace SudokuSolver
                 }
             }
 
-            if (SolveSudoku())
-            {
-                DisplayPuzzle();
-                for (int row = 0; row < 9; row++)
-                {
-                    for (int col = 0; col < 9; col++)
-                    {
-                        buttons[row, col].Text = puzzle[row, col].ToString();
-                        buttons[row, col].ForeColor = System.Drawing.Color.Black;
-                    }
-                }
-                MessageBox.Show("Гра вирішена!");
-            }
-            else
-            {
-                MessageBox.Show("Не вдалося вирішити гру.");
-            }
+            // Копіюємо значення з розв'язаної сітки в сітку гри
+            Array.Copy(solvedPuzzle, puzzle, solvedPuzzle.Length);
+
+            // Оновлення відображення сітки гри
+            DisplayPuzzle();
+
+            // Повідомлення користувачу про успішне вирішення гри
+            MessageBox.Show("Гра вирішена!");
         }
 
+        // Отримання можливих чисел для комірки
         public List<int> GetPossibleNumbers(int row, int col)
         {
             List<int> possibleNumbers = new List<int>();
@@ -154,6 +155,7 @@ namespace SudokuSolver
             return possibleNumbers;
         }
 
+        // Перевірка, чи є число допустимим у комірці
         public bool IsValid(int row, int col, int num)
         {
             for (int i = 0; i < 9; i++)
@@ -166,6 +168,7 @@ namespace SudokuSolver
             return true;
         }
 
+        // Відображення судоку
         public void DisplayPuzzle()
         {
             for (int row = 0; row < 9; row++)
@@ -176,6 +179,8 @@ namespace SudokuSolver
                 }
             }
         }
+
+        // Розв'язання наступного кроку
         public void SolveNextStep()
         {
             if (!SolveCellInSquare() && !SolveCellInRow() && !SolveCellInColumn())
@@ -185,6 +190,7 @@ namespace SudokuSolver
             DisplayPuzzle();
         }
 
+        // Скасування останньої дії
         public void UndoAction()
         {
             if (steps.Count > 0)
@@ -196,7 +202,7 @@ namespace SudokuSolver
                 currentIndex--;
             }
         }
-
+        // Використання "передбачення" у випадку занадто великої кількості ймовірних ходів
         private void MakePrediction()
         {
             if (emptyCells.Count == 0)
@@ -223,7 +229,7 @@ namespace SudokuSolver
                 MakePrediction();
             }
         }
-
+        // Метод розв'язку судоку "один у квадраті"
         private bool SolveCellInSquare()
         {
             for (int num = 1; num <= 9; num++)
@@ -258,7 +264,7 @@ namespace SudokuSolver
             }
             return false;
         }
-
+        // Метод розв'язку судоку "один у рядку"
         private bool SolveCellInRow()
         {
             for (int row = 0; row < 9; row++)
@@ -286,7 +292,7 @@ namespace SudokuSolver
             }
             return false;
         }
-
+        // Метод розв'язку судоку "один у стовпчику"
         private bool SolveCellInColumn()
         {
             for (int col = 0; col < 9; col++)
@@ -314,7 +320,7 @@ namespace SudokuSolver
             }
             return false;
         }
-
+        // Скидання головоломки до початкового стану
     public void ResetPuzzle()
         {
             Array.Copy(initialPuzzle, puzzle, initialPuzzle.Length);
@@ -341,6 +347,7 @@ namespace SudokuSolver
             }
             hintCells.Clear();
         }
+        // Створення випадкової сітки судоку
         public void GenerateRandomPuzzle(int cluesToRemove)
         {
             puzzle = new int[9, 9];
@@ -395,12 +402,14 @@ namespace SudokuSolver
             }
             DisplayPuzzle();
         }
+        // Перевірка чи створена сітка може існувати по правилам гри(зберігає поточний стан, розв'язує його)
         public bool IsSolvable()
         {
             int[,] puzzleCopy = new int[9, 9];
             Array.Copy(puzzle, puzzleCopy, puzzle.Length);
             return SolveSudoku(puzzleCopy);
         }
+        // Метод розв'язання судоку для перевірки існування сітки(копія масиву)
         public bool SolveSudoku(int[,] board)
         {
             for (int row = 0; row < 9; row++)
@@ -429,6 +438,7 @@ namespace SudokuSolver
             }
             return true;
         }
+        // Переввірка числа, що вставляються в сітку судоку
         public bool IsValid(int row, int col, int num, int[,] board)
         {
             for (int i = 0; i < 9; i++)
@@ -454,6 +464,7 @@ namespace SudokuSolver
             }
             return true;
         }
+        // Перемішування сітки гри
         public void ShuffleMap(int i)
         {
             switch (i)
@@ -478,6 +489,7 @@ namespace SudokuSolver
                     break;
             }
         }
+        // Метод розв'язання гри(оригінальний масив)
         public bool SolveSudoku()
         {
             for (int row = 0; row < 9; row++)
@@ -507,7 +519,7 @@ namespace SudokuSolver
             }
             return true;
         }
-
+        // Надання підказки користувачу
         public void GiveHint()
         {
             int minPossibleNumbers = 10;
@@ -547,6 +559,7 @@ namespace SudokuSolver
                 MessageBox.Show("Не вдалося знайти підказку.");
             }
         }
+        // Заповнення діагональних блоків
         public void FillDiagonalBlocks()
         {
             for (int i = 0; i < 9; i += 3)
@@ -554,6 +567,7 @@ namespace SudokuSolver
                 FillBlock(i, i);
             }
         }
+        // Заповнення блоку
         public void FillBlock(int row, int col)
         {
             Random rand = new Random();
@@ -570,6 +584,7 @@ namespace SudokuSolver
                 }
             }
         }
+        //Перевірка заповнення блоку
         public bool IsValidInBlock(int startRow, int startCol, int num)
         {
             for (int row = 0; row < 3; row++)
